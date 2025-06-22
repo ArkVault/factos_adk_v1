@@ -1,4 +1,5 @@
-# ADK Project: Multi-Agent News Truth Verification System
+# Factos: Multi-Agent Shield Against Misinformation
+##ADK Project: Multi-Agent News Truth Verification System
 
 ## Overview
 This project implements a smart, efficient multi-agent system for automated news truth verification using the ADK (Agent Development Kit). The system is designed to extract the main claim from a user-submitted news article, match it against trusted fact-checking databases, and return a detailed misinformation score and analysis. It is optimized for low token usage, minimal API calls, and scalable deployment (e.g., Vertex AI Agent Builder).
