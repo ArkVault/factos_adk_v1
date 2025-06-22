@@ -7,10 +7,10 @@ This project implements a smart, efficient multi-agent system for automated news
 ## Project Goals
 - Automate the verification of news articles submitted by users.
 - Extract the core factual claim from each article using NLP.
-- Match claims against a local and real-time fact-checking corpus (Snopes, FactCheck.org, WHO, CDC, etc.).
+- Match claims against a local and real-time fact-checking corpus (Snopes, FactCheck.org, AP, CDC, etc.).
 - Return a structured misinformation score (0–3) with a visual and textual breakdown.
-- Integrate with the AG-UI protocol and the `factos_factcheckMultiagent` MCP frontend.
-- Optimize for cost, speed, and scalability.
+- Integrate with the AG-UI protocol and the `factos_factcheckMultiagent` frontend.
+
 
 ## Relevance
 Misinformation is a growing problem in digital media. This project provides a scalable, automated solution to help users and organizations quickly assess the truthfulness of news content, reducing the spread of false or misleading information.
