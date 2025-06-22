@@ -1,0 +1,4 @@
+google-adk==1.4.2
+pytest
+python-dotenv
+deprecated
