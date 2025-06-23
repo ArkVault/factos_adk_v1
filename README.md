@@ -4,16 +4,18 @@
 ![1](https://github.com/user-attachments/assets/95699079-9eba-4004-837b-91794ec310ad)
 
 ---
+Misinformation has emerged as one of the most critical challenges of our time, threatening the fabric of informed societies and public discourse. With the growth of false news, distinguishing facts from fake information has become increasingly complex. The rapid spread of false information, coupled with sophisticated techniques for creating and distributing misleading content, demands innovative solutions leveraging artificial intelligence.
 
 ### Overview
 
-**Factos** is a  multi-agent system built using the Agent Development Kit (ADK) to automate the verification of news articles. It extracts the main factual claims from a user-submitted article, compares it to a corpus of trusted fact-checking databases, and returns a structured misinformation score and explanation.
+**Factos** is a  multi-agent system built using the Agent Development Kit (ADK) to automate the verification of news articles. It extracts the main factual claims from a user-submitted article, compares it to a corpus of trusted fact-checkers, and returns a structured misinformation score and a evaluation of the claims, leveraging Gemini 2.5 Flash model for performace annd efficiency.
 
 Misinformation is one of the greatest challenges of our era. It distorts public understanding, undermines science and journalism, threatens democratic institutions, and amplifies polarization. As digital content multiplies and traditional gatekeeping structures dissolve, misinformation spreads faster than it can be verified by humans. The need for scalable, explainable tools that can process and assess claims in real time is no longer optional—it's essential.
 
 Factos addresses this challenge through a modular multi-agent architecture. Each agent specializes in a specific task in the fact-checking pipeline: content scraping, claim extraction, semantic matching, scoring, and formatting. The system uses asynchronous agent-to-agent (A2A) messaging and can be deployed as loosely coupled microservices, enabling horizontal scalability and clear reasoning traceability.
 
-By combining lightweigh models like Gemini Flash 2.5, local vector similarity search, and minimal-token logic, Factos is optimized for cost-efficient, explainable misinformation detection in real-world deployments.
+
+
 
 ---
 
