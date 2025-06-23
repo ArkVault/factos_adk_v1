@@ -6,7 +6,7 @@ aiohttp
 beautifulsoup4
 fastapi
 uvicorn
-pydantic
-google-cloud-aiplatform[adk,agent_engines]
+pydantic==2.11.7
+google-cloud-aiplatform>=1.64.1
 # (Verificado para Vertex AI Agent Builder)
 # Elimina dependencias innecesarias si no las usas en producción

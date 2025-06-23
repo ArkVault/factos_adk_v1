@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "adk_project"
+version = "0.1.0"
+description = "Fact-checking agent system using Google ADK."
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+google-adk = "==1.4.2"
+python-dotenv = "*"
+deprecated = "*"
+aiohttp = "*"
+beautifulsoup4 = "*"
+fastapi = "*"
+uvicorn = "*"
+pydantic = "^2.11.3"
+absl-py = "^2.1.0"
+cloudpickle = "^3.0.0"
+google-cloud-aiplatform = {version = ">=1.64.1", extras = ["adk", "agent-engines"]}
+
+[tool.poetry.scripts]
+deploy-remote = "adk_project.deployment.remote:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api" 
