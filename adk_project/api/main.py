@@ -1,24 +1,26 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import List
 from adk_project.agent import root_agent
-import asyncio
 
 app = FastAPI()
+
+# Pydantic models for request validation
+class Instance(BaseModel):
+    text: str
+
+class PredictionPayload(BaseModel):
+    instances: List[Instance]
 
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
 @app.post("/predict")
-async def predict(request: Request):
-    body = await request.json()
-    instances = body["instances"]
-    
-    # Run the agent predictions concurrently, passing only the text
-    prediction_tasks = [root_agent.run_async(instance['text']) for instance in instances]
-    predictions = await asyncio.gather(*prediction_tasks)
-    
+def predict(payload: PredictionPayload):
+    predictions = [root_agent.run(instance.text) for instance in payload.instances]
     return {"predictions": predictions}
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"} 
+    return {"Hello": "World"}
