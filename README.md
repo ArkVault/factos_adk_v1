@@ -110,6 +110,7 @@ Factos is optimized for deployment as modular cloud-native services. Each agent 
 - Scheduled background jobs for:
   - Weekly updates to the fact-checking corpus
   - Cache refresh for real-time performance improvements
+prototype can be viewed here https://factoswebapp-arkvaults-projects-d96cac84.vercel.app/
 
 ---
 
@@ -122,9 +123,11 @@ Factos is optimized for deployment as modular cloud-native services. Each agent 
 5. The **TruthScorerAgent** assigns a score and adds contextual metadata.
 6. The **ResponseFormatterAgent** formats the full response for the frontend.
 
+![Captura de pantalla 2025-06-23 a la(s) 3 24 35 p m](https://github.com/user-attachments/assets/1787c26b-ebb7-44fb-93dd-c3649684cea5)
 
 
-prototype can be viewed here https://factoswebapp-arkvaults-projects-d96cac84.vercel.app/
+in the background the agents work together for processing the mentioned pipeline and return a structured response
+![Captura de pantalla 2025-06-22 a la(s) 8 30 37 p m](https://github.com/user-attachments/assets/3595cccc-896c-4344-a51d-8408a7443fd2)
 
 ---
 
