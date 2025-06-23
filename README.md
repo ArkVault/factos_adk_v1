@@ -1,67 +1,59 @@
-#Factos: Multi-Agent Shield Against Misinformation
-##ADK Project: Multi-Agent News Truth Verification System
+# Factos: Multi-Agent Shield Against Misinformation  
+## ADK Project — Automated News Truth Verification System
 
-#Overview
-This project implements a smart, efficient multi-agent system for automated news truth verification using the ADK (Agent Development Kit). The system is designed to extract the main claim from a user-submitted news article, match it against trusted fact-checking databases, and return a detailed misinformation score and analysis. It is optimized for low token usage, minimal API calls, and scalable deployment (e.g., Vertex AI Agent Builder).
+---
 
-#Project Goals
-Automate the verification of news articles submitted by users.
-Extract the core factual claim from each article using NLP.
-Match claims against a local and real-time fact-checking corpus (Snopes, FactCheck.org, AP, CDC, etc.).
-Return a structured misinformation score (0–3) with a visual and textual breakdown.
-Integrate with the AG-UI protocol and the factos_factcheckMultiagent frontend.
-Relevance
-Misinformation is a growing problem in digital media. This project provides a scalable, automated solution to help users and organizations quickly assess the truthfulness of news content, reducing the spread of false or misleading information.
+### Overview
 
-#Multi-Agent Implementation
-The system is composed of specialized agents, each responsible for a key step in the verification pipeline:
-![Captura de pantalla 2025-06-22 a la(s) 8 31 09 p m](https://github.com/user-attachments/assets/41d17fb1-c67e-4bfb-8e32-6afde992b0a1)
+**Factos** is a smart, efficient multi-agent system built using the Agent Development Kit (ADK) to automate the verification of news articles. It extracts the main factual claim from a user-submitted article, compares it to a corpus of trusted fact-checking databases, and returns a structured misinformation score and explanation.
 
-1. SmartScraperAgent
-Validates the input URL (HTTPS, accessible, valid domain).
-Scrapes minimal but meaningful content using Firecrawl.
-Extracts headline, byline, publish date, and full text (with depth cap).
-2. ClaimExtractorAgent
-Identifies and extracts the main factual claim using lightweight NLP models (e.g., DistilBERT, MiniLM).
-Returns a concise, token-limited claim string.
-3. FactCheckMatcherAgent
-Checks the extracted claim against a locally maintained, embedded fact-check corpus.
-Searches verified claims using cosine similarity (e.g., Faiss or Chroma).
-Optionally queries real-time fact-checking APIs.
-4. TruthScorerAgent
-Assigns a misinformation score (0–3) and label (True, False, Misleading, Context Needed).
-Provides a detailed analysis and references to verified sources.
-5. ResponseFormatterAgent
-Packages the results into a structured response for the AG-UI frontend.
-Ensures compatibility with the AG-UI protocol and MCP integration.
-Directory Structure
-/agents: Implementations of each agent (SmartScraperAgent, ClaimExtractorAgent, etc.)
-/messages: A2A message definitions (ValidatedArticle, ExtractedClaim, etc.)
-/protocols: AG-UI and A2A schemas
-/deployment: Vertex AI configuration and update jobs
-Tools & Technologies Used
-ADK (Agent Development Kit): For agent orchestration and communication
-Firecrawl: For efficient web scraping
-NLP Models: DistilBERT, MiniLM (for claim extraction)
-Vector Search: Faiss or Chroma (for claim matching)
-Vertex AI Agent Builder: For scalable cloud deployment
-Python: Main programming language
-AG-UI Protocol: For frontend integration
-Deployment
-Designed for deployment on Vertex AI (see /deployment/vertex_ai.md)
-Agents are grouped in containers for scalability and cost optimization
-Asynchronous operation and resource limits for each agent
-Weekly jobs for database updates and result caching
-#How It Works
-![Captura de pantalla 2025-06-22 a la(s) 8 30 37 p m](https://github.com/user-attachments/assets/20412a03-25fb-4b4d-8d07-1dc4d3fb6ddc)
+Misinformation is one of the greatest challenges of our era. It distorts public understanding, undermines science and journalism, threatens democratic institutions, and amplifies polarization. As digital content multiplies and traditional gatekeeping structures dissolve, misinformation spreads faster than it can be verified by humans. The need for scalable, explainable tools that can process and assess claims in real time is no longer optional—it's essential.
 
-The user submits a news article URL.
-The SmartScraperAgent validates and scrapes the article.
-The ClaimExtractorAgent extracts the main claim.
-The FactCheckMatcherAgent matches the claim against trusted sources.
-The TruthScorerAgent assigns a score and provides analysis.
-The ResponseFormatterAgent formats the result for the frontend.
-Next Steps
-Implement base files for each agent and key messages.
-Expand the fact-checking corpus and real-time API integrations.
-Optimize for further cost and speed improvements.
+Factos addresses this challenge through a modular multi-agent architecture. Each agent specializes in a specific task in the fact-checking pipeline: content scraping, claim extraction, semantic matching, scoring, and formatting. The system uses asynchronous agent-to-agent (A2A) messaging and can be deployed as loosely coupled microservices, enabling horizontal scalability and clear reasoning traceability.
+
+By combining lightweight NLP models, local vector similarity search, and minimal-token logic, Factos is optimized for cost-efficient, explainable misinformation detection in real-world deployments.
+
+---
+
+### Project Goals
+
+- Automate verification of user-submitted news articles
+- Extract the central factual claim using NLP
+- Match extracted claims to trusted static and real-time fact-checking sources
+- Return a structured misinformation score (0–3) with explanation and references
+- Provide a response formatted for frontend integration via the AG-UI protocol
+
+---
+
+### Multi-Agent Architecture
+
+The Factos system is composed of autonomous, asynchronous agents that communicate using defined message schemas. Each agent handles one core task in the verification pipeline.
+
+#### Agents:
+
+1. **SmartScraperAgent**  
+   - Validates input URLs (HTTPS, accessible, known domains)  
+   - Uses Firecrawl to extract structured article metadata and content  
+   - Outputs: headline, byline, publish date, and article body  
+
+2. **ClaimExtractorAgent**  
+   - Applies NLP to extract a concise, token-limited factual claim  
+   - Uses transformer-based sentence ranking (e.g., DistilBERT, MiniLM)  
+
+3. **FactCheckMatcherAgent**  
+   - Matches the extracted claim to verified claims using vector search  
+   - Uses Faiss or Chroma to perform cosine similarity comparison  
+   - Supports optional integration with real-time fact-checking APIs  
+
+4. **TruthScorerAgent**  
+   - Assigns a misinformation score (0 = True, 3 = False)  
+   - Adds label (e.g., Misleading, Context Needed), source links, and rationale  
+
+5. **ResponseFormatterAgent**  
+   - Formats the complete result for compatibility with the AG-UI protocol  
+   - Ensures structured response for display or downstream use
+
+---
+
+### Directory Structure
+
