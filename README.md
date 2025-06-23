@@ -55,20 +55,6 @@ The Factos is an asynchronous multi-agent pipeline in which each autonomous agen
 
 ![Captura de pantalla 2025-06-23 a la(s) 3 20 36 p m](https://github.com/user-attachments/assets/848df321-ce6e-492e-9a9d-e0c117569a9f)
 
-
----
-
-### Directory Structure
-/agents → Full agent implementations:
-- SmartScraperAgent
-- ClaimExtractorAgent
-- FactCheckMatcherAgent
-- TruthScorerAgent
-- ResponseFormatterAgent
-
-
-
-
 ---
 
 ### Toolbox
