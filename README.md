@@ -38,7 +38,7 @@ The Factos is an asynchronous multi-agent pipeline in which each autonomous agen
 
 2. **ClaimExtractorAgent**  
    - Applies NLP to extract a concise, token-limited factual claim  
-   - Uses transformer-based sentence ranking (e.g., DistilBERT, MiniLM)  
+   - Uses transformer-based sentence ranking  
 
 3. **FactCheckMatcherAgent**  
    - Matches the extracted claim to verified claims using vector search  
