@@ -29,7 +29,7 @@ By combining lightweigh models like Gemini Flash 2.5, local vector similarity se
 
 ### Multi-Agent Architecture
 
-The Factos system is composed of autonomous, asynchronous agents that communicate using defined message schemas. Each agent handles one core task in the verification pipeline.
+The Factos is an asynchronous multi-agent pipeline in which each autonomous agent performs a specific stage of the fact-checking process—starting with URL validation and article scraping, then claim extraction, semantic matching, misinformation scoring, and finally formatting the result for UI consumption. Although the logical data flow is sequential, the architecture is event-driven: agents communicate via structured message allowing each agent to process tasks independently as messages arrive, making it highly adaptable for real-time, explainable misinformation detection.
 
 ![Captura de pantalla 2025-06-22 a la(s) 8 31 09 p m](https://github.com/user-attachments/assets/6f8a4181-d757-42bf-924f-bb06935f4276)
 
