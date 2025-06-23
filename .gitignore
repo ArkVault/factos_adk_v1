@@ -1,0 +1,121 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Entornos virtuales
+venv/
+ENV/
+.env/
+.venv/
+
+# Archivos de configuración de entorno y secretos
+.env
+.env.*
+*.env
+*.secret
+*.secrets
+secrets.*
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Archivos de credenciales
+*.sqlite3
+*.db
+*.log
+*.pkl
+*.h5
+*.ckpt
+
+# Archivos de usuario y sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Archivos de VSCode
+.vscode/
+
+# Archivos de Jupyter
+.ipynb_checkpoints/
+
+# Otros
+*.bak
+*.tmp
+*.old
+*.orig
+
+# Node/npm
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Archivos de pruebas
+coverage/
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+
+# Documentación generada
+_site/
+docs/_build/
+
+# Archivos de lock
+Pipfile.lock
+poetry.lock
+
+# Archivos de configuración de CI/CD
+*.yml
+*.yaml
+!/.github/
+
+# Excluir archivos grandes o binarios
+*.zip
+*.tar.gz
+*.tar
+*.rar
+*.7z
+*.exe
+*.dll
+*.bin
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+*.pdf
+*.docx
+*.xlsx
+*.pptx
+
+# Excluir archivos personales
+*.iml
+.idea/
+
+# Personaliza según tus necesidades
+
+# Environment variables
+.env
+
+# Google Cloud SDK
+google-cloud-sdk/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
