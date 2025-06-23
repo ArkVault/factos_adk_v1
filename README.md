@@ -129,6 +129,7 @@ Factos is optimized for deployment as modular cloud-native services. Each agent 
 
 
 prototype can be viewed here https://factoswebapp-arkvaults-projects-d96cac84.vercel.app/
+
 ---
 
 ### Next Steps
@@ -137,6 +138,6 @@ prototype can be viewed here https://factoswebapp-arkvaults-projects-d96cac84.ve
 - [ ] Expand and diversify the fact-checking knowledge base,more factcheckers
 - [ ] Integrate fallback strategies using multiple claim extractors
 - [ ] Deploy early prototypes with limited real-time coverage  
-- [ ] A browser tool wiith ui for the evaluator
+- [ ] A browser tool or extension to evaluate in-window news sites
 
 
