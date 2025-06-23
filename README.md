@@ -67,9 +67,6 @@ The Factos is an asynchronous multi-agent pipeline in which each autonomous agen
 - ResponseFormatterAgent
 
 
-/protocols → AG-UI frontend protocol definitions 
-/deployment → Vertex AI and container deployment configurations
-
 
 
 ---
@@ -83,11 +80,10 @@ A selection of libraries and frameworks used across the system:
 - **Pydantic** – Message schema validation and serialization
 - **FastAPI** – Lightweight service layer for agent endpoints (optional)
 - **Firecrawl** – Token-efficient web scraping with structured content extraction
-- **Faiss / Chroma** – High-performance vector databases for semantic matching
+- **Faiss* – High-performance vector databases for semantic matching
 
-**NLP Models:**
-- **DistilBERT** – Lightweight transformer for claim classification and scoring
-- **MiniLM** – Used for sentence embedding and similarity comparison
+**Model:**
+- **Gemini Flash 2.5
 
 **Deployment and Infrastructure:**
 - **Vertex AI Agent Builder** – Containerized deployment and scaling
