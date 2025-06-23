@@ -115,7 +115,6 @@ Factos is optimized for deployment as modular cloud-native services. Each agent 
   - Weekly updates to the fact-checking corpus
   - Cache refresh for real-time performance improvements
 
-
 ---
 
 ### How It Works
@@ -129,6 +128,7 @@ Factos is optimized for deployment as modular cloud-native services. Each agent 
 
 
 
+prototype can be viewed here https://factoswebapp-arkvaults-projects-d96cac84.vercel.app/
 ---
 
 ### Next Steps
@@ -136,7 +136,7 @@ Factos is optimized for deployment as modular cloud-native services. Each agent 
 - [ ] Implement and test each agent’s base file
 - [ ] Expand and diversify the fact-checking knowledge base,more factcheckers
 - [ ] Integrate fallback strategies using multiple claim extractors
-- [ ] Deploy early prototypes with limited real-time coverage
+- [ ] Deploy early prototypes with limited real-time coverage  
 - [ ] A browser tool wiith ui for the evaluator
 
 
