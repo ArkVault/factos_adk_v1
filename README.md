@@ -58,6 +58,8 @@ The Factos system is composed of autonomous, asynchronous agents that communicat
    - Formats the complete result for compatibility with the AG-UI protocol  
    - Ensures structured response for display or downstream use
 
+![architecture](https://github.com/user-attachments/assets/3e329cb1-0458-402f-ab2f-b6439c7e4e29)
+
 ---
 
 ### Directory Structure
