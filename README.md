@@ -1,6 +1,8 @@
 # Factos: Multi-Agent Shield Against Misinformation  
 ## ADK Project — Automated News Truth Verification System
 
+![1](https://github.com/user-attachments/assets/95699079-9eba-4004-837b-91794ec310ad)
+
 ---
 
 ### Overview
@@ -11,7 +13,7 @@ Misinformation is one of the greatest challenges of our era. It distorts public 
 
 Factos addresses this challenge through a modular multi-agent architecture. Each agent specializes in a specific task in the fact-checking pipeline: content scraping, claim extraction, semantic matching, scoring, and formatting. The system uses asynchronous agent-to-agent (A2A) messaging and can be deployed as loosely coupled microservices, enabling horizontal scalability and clear reasoning traceability.
 
-By combining lightweight NLP models, local vector similarity search, and minimal-token logic, Factos is optimized for cost-efficient, explainable misinformation detection in real-world deployments.
+By combining lightweigh models like Gemini Flash 2.5, local vector similarity search, and minimal-token logic, Factos is optimized for cost-efficient, explainable misinformation detection in real-world deployments.
 
 ---
 
@@ -28,6 +30,9 @@ By combining lightweight NLP models, local vector similarity search, and minimal
 ### Multi-Agent Architecture
 
 The Factos system is composed of autonomous, asynchronous agents that communicate using defined message schemas. Each agent handles one core task in the verification pipeline.
+
+![Captura de pantalla 2025-06-22 a la(s) 8 31 09 p m](https://github.com/user-attachments/assets/6f8a4181-d757-42bf-924f-bb06935f4276)
+
 
 #### Agents:
 
