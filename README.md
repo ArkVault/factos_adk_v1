@@ -1,10 +1,10 @@
-Factos: Multi-Agent Shield Against Misinformation
+#Factos: Multi-Agent Shield Against Misinformation
 ##ADK Project: Multi-Agent News Truth Verification System
 
-Overview
+#Overview
 This project implements a smart, efficient multi-agent system for automated news truth verification using the ADK (Agent Development Kit). The system is designed to extract the main claim from a user-submitted news article, match it against trusted fact-checking databases, and return a detailed misinformation score and analysis. It is optimized for low token usage, minimal API calls, and scalable deployment (e.g., Vertex AI Agent Builder).
 
-Project Goals
+#Project Goals
 Automate the verification of news articles submitted by users.
 Extract the core factual claim from each article using NLP.
 Match claims against a local and real-time fact-checking corpus (Snopes, FactCheck.org, AP, CDC, etc.).
@@ -13,8 +13,9 @@ Integrate with the AG-UI protocol and the factos_factcheckMultiagent frontend.
 Relevance
 Misinformation is a growing problem in digital media. This project provides a scalable, automated solution to help users and organizations quickly assess the truthfulness of news content, reducing the spread of false or misleading information.
 
-Multi-Agent Implementation
+#Multi-Agent Implementation
 The system is composed of specialized agents, each responsible for a key step in the verification pipeline:
+![Captura de pantalla 2025-06-22 a la(s) 8 31 09 p m](https://github.com/user-attachments/assets/41d17fb1-c67e-4bfb-8e32-6afde992b0a1)
 
 1. SmartScraperAgent
 Validates the input URL (HTTPS, accessible, valid domain).
@@ -51,7 +52,9 @@ Designed for deployment on Vertex AI (see /deployment/vertex_ai.md)
 Agents are grouped in containers for scalability and cost optimization
 Asynchronous operation and resource limits for each agent
 Weekly jobs for database updates and result caching
-How It Works
+#How It Works
+![Captura de pantalla 2025-06-22 a la(s) 8 30 37 p m](https://github.com/user-attachments/assets/20412a03-25fb-4b4d-8d07-1dc4d3fb6ddc)
+
 The user submits a news article URL.
 The SmartScraperAgent validates and scrapes the article.
 The ClaimExtractorAgent extracts the main claim.
