@@ -7,7 +7,7 @@
 
 ### Overview
 
-**Factos** is a smart, efficient multi-agent system built using the Agent Development Kit (ADK) to automate the verification of news articles. It extracts the main factual claim from a user-submitted article, compares it to a corpus of trusted fact-checking databases, and returns a structured misinformation score and explanation.
+**Factos** is a  multi-agent system built using the Agent Development Kit (ADK) to automate the verification of news articles. It extracts the main factual claims from a user-submitted article, compares it to a corpus of trusted fact-checking databases, and returns a structured misinformation score and explanation.
 
 Misinformation is one of the greatest challenges of our era. It distorts public understanding, undermines science and journalism, threatens democratic institutions, and amplifies polarization. As digital content multiplies and traditional gatekeeping structures dissolve, misinformation spreads faster than it can be verified by humans. The need for scalable, explainable tools that can process and assess claims in real time is no longer optional—it's essential.
 
@@ -70,13 +70,11 @@ The Factos system is composed of autonomous, asynchronous agents that communicat
 - TruthScorerAgent
 - ResponseFormatterAgent
 
-/messages → A2A message schemas (e.g., ValidatedArticle, ExtractedClaim)
-/protocols → AG-UI frontend protocol definitions and MCP contract
+
+/protocols → AG-UI frontend protocol definitions 
 /deployment → Vertex AI and container deployment configurations
 
-markdown
-Copiar
-Editar
+
 
 ---
 
@@ -117,13 +115,6 @@ Factos is optimized for deployment as modular cloud-native services. Each agent 
   - Weekly updates to the fact-checking corpus
   - Cache refresh for real-time performance improvements
 
-Deployment instructions and setup scripts are included in:
-
-/deployment/vertex_ai.md
-
-yaml
-Copiar
-Editar
 
 ---
 
@@ -143,9 +134,9 @@ Editar
 ### Next Steps
 
 - [ ] Implement and test each agent’s base file
-- [ ] Expand and diversify the fact-checking knowledge base
+- [ ] Expand and diversify the fact-checking knowledge base,more factcheckers
 - [ ] Integrate fallback strategies using multiple claim extractors
 - [ ] Deploy early prototypes with limited real-time coverage
-- [ ] Add Slack and Discord bot connectors for user testing
+- [ ] A browser tool wiith ui for the evaluator
 
 
