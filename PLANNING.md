@@ -4,7 +4,7 @@
 ---
 
 ## 🎯 Project Goal
-Design a multi-agent system using the **ADK (Agent Development Kit)** that automates the truth verification of user-submitted news articles. The system should extract the article’s core claim, match it against a trusted set of databases (Snopes, FactCheck.org, WHO, CDC, etc.), and return a **Misinformation Score (0–3)** with a visual + textual breakdown — while optimizing for **low token usage, minimal API calls, and scalable deployment using Vertex AI Agent Builder**.
+Design a multi-agent system using the **ADK (Agent Development Kit)** that automates the truth verification of user-submitted news articles. The system should extract the article's core claim, match it against a trusted set of databases (Snopes, FactCheck.org, WHO, CDC, etc.), and return a **Misinformation Score (0–3)** with a visual + textual breakdown — while optimizing for **low token usage, minimal API calls, and scalable deployment using Vertex AI Agent Builder**.
 
 This system must integrate with the frontend from the `factos_factcheckMultiagent` MCP and follow the **AG-UI protocol**.
 

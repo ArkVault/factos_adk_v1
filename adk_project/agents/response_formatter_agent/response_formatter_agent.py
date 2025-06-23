@@ -1,6 +1,9 @@
 from google.adk.agents import LlmAgent
 from adk_project.agents.response_formatter_agent.prompt import FORMATTER_PROMPT
 import asyncio
+from google.adk.events import Event
+from google.genai.types import Part, Content
+import json
 
 AGUI_RESPONSE_SCHEMA = {
     "headline": "str",
@@ -53,5 +56,7 @@ class ResponseFormatterAgent(LlmAgent):
             "original_source_url": article.get("url", ""),
             "verified_sources_label": "High Trust"  # Simulado
         }
-        state["agui_response"] = agui_response
-        yield  # Para cumplir con la interfaz async
+        # The agent's final output must be yielded as an Event object.
+        # We wrap our dictionary in a Part and then in an Event.
+        final_part = Part(text=json.dumps(agui_response))
+        yield Event(content=Content(parts=[final_part]), author=self.name)

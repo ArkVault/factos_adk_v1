@@ -23,3 +23,5 @@ class RootAgent(SequentialAgent):
                 ResponseFormatterAgent()
             ]
         )
+
+root_agent = RootAgent() 

@@ -1,5 +1,8 @@
 from google.adk.agents import LlmAgent
 from adk_project.agents.smart_scraper_agent.prompt import SCRAPER_PROMPT
+import json
+from google.adk.events import Event
+from google.genai.types import Part, Content
 
 class SmartScraperAgent(LlmAgent):
     def __init__(self):
@@ -15,7 +18,7 @@ class SmartScraperAgent(LlmAgent):
         url = ctx.session.state.get("input", "")
         # Simulación específica para la URL de The Guardian
         if url == "https://www.theguardian.com/world/2025/jun/11/uk-and-gibraltar-strike-deal-over-territorys-future-and-borders":
-            ctx.session.state["validated_article"] = {
+            article = {
                 "url": url,
                 "headline": "UK and Gibraltar strike deal over territory's future and borders",
                 "byline": "Sam Jones in Madrid and agencies",
@@ -28,11 +31,12 @@ class SmartScraperAgent(LlmAgent):
             }
         else:
             # Simulación: siempre devuelve un artículo válido para pruebas
-            ctx.session.state["validated_article"] = {
+            article = {
                 "url": "https://example-health-news.com",
                 "headline": "Study Shows Coffee Prevents Cancer in 90% of Cases",
                 "byline": "Health News Desk",
                 "publish_date": "2025-06-21",
                 "full_text": "Coffee consumption prevents 90% of all cancer cases according to new research. The study referenced only looked at a specific type of liver cancer in lab mice, not humans. It found a correlation between a compound in coffee and reduced tumor growth in mice, but did not demonstrate cancer prevention in humans at any percentage close to 90%."
             }
-        yield
+        final_part = Part(text=json.dumps(article))
+        yield Event(content=Content(parts=[final_part]), author=self.name)

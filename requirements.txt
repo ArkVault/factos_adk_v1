@@ -1,4 +1,12 @@
+-e .
 google-adk==1.4.2
-pytest
 python-dotenv
 deprecated
+aiohttp
+beautifulsoup4
+fastapi
+uvicorn
+pydantic
+google-cloud-aiplatform[adk,agent_engines]
+# (Verificado para Vertex AI Agent Builder)
+# Elimina dependencias innecesarias si no las usas en producción

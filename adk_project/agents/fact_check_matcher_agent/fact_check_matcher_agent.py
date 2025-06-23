@@ -2,6 +2,9 @@ from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
 from adk_project.agents.fact_check_matcher_agent.prompt import MATCHER_PROMPT
 from adk_project.agents.fact_check_matcher_agent.factchecker_scraper import get_factchecker_claims
+import json
+from google.adk.events import Event
+from google.genai.types import Part, Content
 
 async def factchecker_search_tool(main_claim: str):
     # Simulación específica para la noticia de The Guardian
@@ -29,16 +32,9 @@ class FactCheckMatcherAgent(LlmAgent):
         )
 
     async def run_async(self, ctx):
-        claim = ctx.session.state.get("extracted_claim", {}).get("claim", "")
-        if "Gibraltar" in claim:
-            ctx.session.state["match_results"] = {
-                "matches": [
-                    {"claim": "There is no evidence that the new UK-Gibraltar-Spain deal changes British sovereignty over Gibraltar.", "confidence": 0.97, "source": "https://www.factcheck.org/uk-gibraltar-sovereignty-deal/"},
-                    {"claim": "The agreement is designed to maintain free movement and reduce border friction, not to alter sovereignty.", "confidence": 0.95, "source": "https://apnews.com/ap-fact-check/gibraltar-deal"},
-                    {"claim": "Fact-checkers confirm the deal is a diplomatic breakthrough, not a sovereignty transfer.", "confidence": 0.93, "source": "https://reporterslab.org/fact-checking/gibraltar-deal/"}
-                ]
-            }
-        else:
-            # ...comportamiento por defecto...
-            pass
-        yield
+        # This agent's only job is to invoke the LLM with the provided
+        # claim from the previous agent. The LLM will then use the
+        # factchecker_tool to get live results. We don't need any
+        # special logic here.
+        async for event in super().run_async(ctx):
+            yield event
