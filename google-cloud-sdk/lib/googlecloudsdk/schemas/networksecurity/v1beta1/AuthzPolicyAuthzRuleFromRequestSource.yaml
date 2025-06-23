@@ -1,0 +1,41 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+
+title: networksecurity v1beta1 AuthzPolicyAuthzRuleFromRequestSource export schema
+description: A gcloud export/import command YAML validation schema.
+type: object
+additionalProperties: false
+properties:
+  COMMENT:
+    type: object
+    description: User specified info ignored by gcloud import.
+    additionalProperties: false
+    properties:
+      template-id:
+        type: string
+      region:
+        type: string
+      description:
+        type: string
+      date:
+        type: string
+      version:
+        type: string
+  UNKNOWN:
+    type: array
+    description: Unknown API fields that cannot be imported.
+    items:
+      type: string
+  ipBlocks:
+    description: |-
+      A list of IPs or CIDRs to match against the source IP of a request.
+      Limited to 5 ip_blocks.
+    type: array
+    items:
+      $ref: AuthzPolicyAuthzRuleIpBlock.yaml
+  resources:
+    description: |-
+      A list of resources to match against the resource of the source VM of
+      a request. Limited to 5 resources.
+    type: array
+    items:
+      $ref: AuthzPolicyAuthzRuleRequestResource.yaml
