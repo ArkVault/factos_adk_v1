@@ -56,4 +56,91 @@ The Factos system is composed of autonomous, asynchronous agents that communicat
 ---
 
 ### Directory Structure
+/agents → Full agent implementations:
+- SmartScraperAgent
+- ClaimExtractorAgent
+- FactCheckMatcherAgent
+- TruthScorerAgent
+- ResponseFormatterAgent
+
+/messages → A2A message schemas (e.g., ValidatedArticle, ExtractedClaim)
+/protocols → AG-UI frontend protocol definitions and MCP contract
+/deployment → Vertex AI and container deployment configurations
+
+markdown
+Copiar
+Editar
+
+---
+
+### Toolbox
+
+A selection of libraries and frameworks used across the system:
+
+**Core Architecture:**
+- **Agent Development Kit (ADK)** – Agent design, messaging, and orchestration
+- **Pydantic** – Message schema validation and serialization
+- **FastAPI** – Lightweight service layer for agent endpoints (optional)
+- **Firecrawl** – Token-efficient web scraping with structured content extraction
+- **Faiss / Chroma** – High-performance vector databases for semantic matching
+
+**NLP Models:**
+- **DistilBERT** – Lightweight transformer for claim classification and scoring
+- **MiniLM** – Used for sentence embedding and similarity comparison
+
+**Deployment and Infrastructure:**
+- **Vertex AI Agent Builder** – Containerized deployment and scaling
+- **Cloud Scheduler / Cloud Functions** – Fact database refresh and cache priming
+- **Docker** – Agent containerization for deployment
+
+**Integration:**
+- **AG-UI Protocol** – Structured frontend response format for display and feedback
+- **MCP (Model Context Protocol)** – Optional backend integration layer
+
+---
+
+### Deployment
+
+Factos is optimized for deployment as modular cloud-native services. Each agent can run independently or grouped in containers.
+
+- Deployment targets: **Vertex AI Agent Builder**, with support for other Kubernetes-based platforms
+- Agents are containerized for cost-effective scaling
+- Asynchronous design ensures resilience and fault isolation
+- Scheduled background jobs for:
+  - Weekly updates to the fact-checking corpus
+  - Cache refresh for real-time performance improvements
+
+Deployment instructions and setup scripts are included in:
+
+/deployment/vertex_ai.md
+
+yaml
+Copiar
+Editar
+
+---
+
+### How It Works
+
+1. The user submits a news article URL.
+2. The **SmartScraperAgent** scrapes and validates the article.
+3. The **ClaimExtractorAgent** extracts the main factual statement.
+4. The **FactCheckMatcherAgent** compares it with known verified claims.
+5. The **TruthScorerAgent** assigns a score and adds contextual metadata.
+6. The **ResponseFormatterAgent** formats the full response for the frontend.
+
+Visual reference:
+
+![System Flow](https://github.com/user-attachments/assets/41d17fb1-c67e-4bfb-8e32-6afde992b0a1)
+
+---
+
+### Next Steps
+
+- [ ] Implement and test each agent’s base file
+- [ ] Expand and diversify the fact-checking knowledge base
+- [ ] Integrate fallback strategies using multiple claim extractors
+- [ ] Deploy early prototypes with limited real-time coverage
+- [ ] Add Slack and Discord bot connectors for user testing
+
 
