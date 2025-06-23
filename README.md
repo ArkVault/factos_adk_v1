@@ -134,9 +134,7 @@ Editar
 5. The **TruthScorerAgent** assigns a score and adds contextual metadata.
 6. The **ResponseFormatterAgent** formats the full response for the frontend.
 
-Visual reference:
 
-![System Flow](https://github.com/user-attachments/assets/41d17fb1-c67e-4bfb-8e32-6afde992b0a1)
 
 ---
 
