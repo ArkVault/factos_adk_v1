@@ -1,0 +1,20 @@
+# .gcloudignore - Archivos a excluir del build
+.git/
+.pytest_cache/
+.ruff_cache/
+.venv/
+factos_venv/
+test_*.py
+*.pyc
+__pycache__/
+.DS_Store
+*.log
+.env.local
+.env.development
+.env.test
+README.md
+PERFORMANCE_OPTIMIZATIONS.md
+PLANNING.md
+FIRECRAWL_HTTP.md
+architecture.json
+docker-compose.firecrawl.yml

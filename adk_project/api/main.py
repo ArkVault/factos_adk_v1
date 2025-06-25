@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, HttpUrl, validator
 from typing import List, Any, Optional
@@ -122,18 +122,54 @@ class PredictResponse(BaseModel):
     predictions: List[FactCheckResult]
     processing_info: dict
 
-# Health check endpoint
-@app.get("/", tags=["health"])
-def health_check():
-    """Health check endpoint"""
+# Endpoints básicos
+@app.get("/")
+async def root():
+    """Endpoint raíz con información del servicio"""
     return {
-        "status": "healthy",
         "service": "Factos Agents API",
-        "version": "1.0.0",
-        "timestamp": time.time()
+        "description": "AI-powered fact-checking service using Google ADK",
+        "version": "1.0.0 - Optimized",
+        "status": "running",
+        "endpoints": {
+            "fact_check": "/fact-check",
+            "predict": "/predict", 
+            "health": "/health",
+            "docs": "/docs"
+        }
     }
 
-@app.get("/health", tags=["health"])
+@app.get("/health")
+async def health_check():
+    """Health check endpoint para Cloud Run"""
+    try:
+        # Verificar que las variables de entorno críticas estén presentes
+        required_vars = ["GOOGLE_API_KEY", "FIRECRAWL_API_KEY", "PERPLEXITY_API_KEY"]
+        missing_vars = [var for var in required_vars if not os.getenv(var)]
+        
+        if missing_vars:
+            return {
+                "status": "unhealthy",
+                "error": f"Missing environment variables: {missing_vars}",
+                "timestamp": time.time()
+            }
+        
+        return {
+            "status": "healthy",
+            "service": "factos-agents",
+            "version": "1.0.0-optimized",
+            "timestamp": time.time(),
+            "uptime": "running"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy", 
+            "error": str(e),
+            "timestamp": time.time()
+        }
+
+# Health check endpoint
+@app.get("/health-old", tags=["health"])
 def detailed_health_check():
     """Detailed health check with environment validation"""
     required_env_vars = [
@@ -199,23 +235,16 @@ async def fact_check_news(request: PredictRequest):
                 validated_url = str(news_url.url)
             except Exception as e:
                 logger.error(f"Invalid URL {url}: {e}")
-                results.append({
-                    "headline": "",
-                    "url": url,
-                    "score": 0,
-                    "score_label": "Invalid URL",
-                    "main_claim": "",
-                    "detailed_analysis": f"Invalid URL provided: {str(e)}",
-                    "verified_sources": [],
-                    "recommendation": "Please provide a valid news URL",
-                    "media_literacy_tip": "Always verify that URLs are from legitimate news sources",
-                    "processing_time": 0.0,
-                    "confidence_level": 0,
-                    "sources_checked": 0,
-                    "original_source_label": "Invalid",
-                    "original_source_url": url,
-                    "verified_sources_label": "N/A"
-                })
+                results.append(create_fact_check_result(
+                    url=url,
+                    processing_time=0.0,
+                    error_info={
+                        "score_label": "Invalid URL",
+                        "detailed_analysis": f"Invalid URL provided: {str(e)}",
+                        "recommendation": "Please provide a valid news URL",
+                        "media_literacy_tip": "Always verify that URLs are from legitimate news sources"
+                    }
+                ))
                 processing_info["failed_urls"] += 1
                 continue
             
@@ -257,23 +286,11 @@ async def fact_check_news(request: PredictRequest):
                     raise Exception("No valid response from fact-checking pipeline")
                 
                 # Asegurar que todos los campos requeridos están presentes
-                result = {
-                    "headline": agui_response.get("headline", ""),
-                    "url": agui_response.get("url", validated_url),
-                    "score": agui_response.get("score", 0),
-                    "score_label": agui_response.get("score_label", "Unknown"),
-                    "main_claim": agui_response.get("main_claim", ""),
-                    "detailed_analysis": agui_response.get("detailed_analysis", ""),
-                    "verified_sources": agui_response.get("verified_sources", []),
-                    "recommendation": agui_response.get("recommendation", ""),
-                    "media_literacy_tip": agui_response.get("media_literacy_tip", ""),
-                    "processing_time": processing_time,
-                    "confidence_level": agui_response.get("confidence_level", 0),
-                    "sources_checked": agui_response.get("sources_checked", 0),
-                    "original_source_label": agui_response.get("original_source_label", ""),
-                    "original_source_url": validated_url,
-                    "verified_sources_label": agui_response.get("verified_sources_label", "")
-                }
+                result = create_fact_check_result(
+                    agui_response=agui_response,
+                    url=validated_url,
+                    processing_time=processing_time
+                )
                 
                 results.append(result)
                 processing_info["processed_urls"] += 1
@@ -282,44 +299,30 @@ async def fact_check_news(request: PredictRequest):
                 
             except asyncio.TimeoutError:
                 logger.error(f"Timeout processing URL {url}")
-                results.append({
-                    "headline": "",
-                    "url": validated_url,
-                    "score": 0,
-                    "score_label": "Processing Timeout",
-                    "main_claim": "",
-                    "detailed_analysis": "Processing timed out after 60 seconds",
-                    "verified_sources": [],
-                    "recommendation": "Try again later or check if the URL is accessible",
-                    "media_literacy_tip": "Some sources may take longer to process due to complex content",
-                    "processing_time": 60.0,
-                    "confidence_level": 0,
-                    "sources_checked": 0,
-                    "original_source_label": "Timeout",
-                    "original_source_url": validated_url,
-                    "verified_sources_label": "N/A"
-                })
+                results.append(create_fact_check_result(
+                    url=validated_url,
+                    processing_time=60.0,
+                    error_info={
+                        "score_label": "Processing Timeout",
+                        "detailed_analysis": "Processing timed out after 60 seconds",
+                        "recommendation": "Try again later or check if the URL is accessible",
+                        "media_literacy_tip": "Some sources may take longer to process due to complex content"
+                    }
+                ))
                 processing_info["failed_urls"] += 1
                 
         except Exception as e:
             logger.error(f"Error processing URL {url}: {str(e)}")
-            results.append({
-                "headline": "",
-                "url": url,
-                "score": 0,
-                "score_label": "Processing Error",
-                "main_claim": "",
-                "detailed_analysis": f"An error occurred while processing: {str(e)}",
-                "verified_sources": [],
-                "recommendation": "Please try again or contact support if the issue persists",
-                "media_literacy_tip": "Technical errors can occur when processing complex content",
-                "processing_time": 0.0,
-                "confidence_level": 0,
-                "sources_checked": 0,
-                "original_source_label": "Error",
-                "original_source_url": url,
-                "verified_sources_label": "N/A"
-            })
+            results.append(create_fact_check_result(
+                url=url,
+                processing_time=0.0,
+                error_info={
+                    "score_label": "Processing Error",
+                    "detailed_analysis": f"An error occurred while processing: {str(e)}",
+                    "recommendation": "Please try again or contact support if the issue persists",
+                    "media_literacy_tip": "Technical errors can occur when processing complex content"
+                }
+            ))
             processing_info["failed_urls"] += 1
     
     # Completar información de procesamiento
@@ -354,6 +357,122 @@ async def fact_check_single_url(url: NewsURL):
         )
     
     return response.predictions[0]
+
+# Endpoint de prueba que acepta GET y POST para debugging
+@app.get("/test-fact-check", response_model=dict, tags=["debug"])
+@app.post("/test-fact-check", response_model=dict, tags=["debug"])
+async def test_fact_check_endpoint(url: str = Query(None), request_body: dict = Body(None)):
+    """
+    Endpoint de prueba para debugging - acepta tanto GET como POST
+    """
+    if url:  # GET request
+        test_url = url
+    elif request_body and "url" in request_body:  # POST request
+        test_url = request_body["url"]
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Se requiere 'url' como query parameter (GET) o en el body (POST)"
+        )
+    
+    return {
+        "test": "success",
+        "received_url": test_url,
+        "method": "GET or POST accepted",
+        "cors_enabled": True,
+        "ready_for_fact_check": True
+    }
+
+def create_fact_check_result(
+    agui_response: dict = None,
+    url: str = "",
+    processing_time: float = 0.0,
+    error_info: dict = None
+) -> dict:
+    """
+    Crear un resultado de fact-check completo con todos los campos requeridos
+    """
+    from urllib.parse import urlparse
+    
+    # Extraer dominio de la URL
+    try:
+        parsed_url = urlparse(url)
+        source_domain = parsed_url.netloc or "unknown"
+    except:
+        source_domain = "unknown"
+    
+    if error_info:
+        # Caso de error
+        return {
+            "headline": error_info.get("headline", ""),
+            "url": url,
+            "source_domain": source_domain,
+            "score": 0,
+            "score_label": error_info.get("score_label", "Error"),
+            "score_fraction": "0/10",
+            "main_claim": "",
+            "detailed_analysis": error_info.get("detailed_analysis", "An error occurred"),
+            "verified_sources": [],
+            "verified_sources_label": "N/A",
+            "recommendation": error_info.get("recommendation", "Please try again"),
+            "media_literacy_tip": error_info.get("media_literacy_tip", "Always verify information from multiple sources"),
+            "source_credibility": {
+                "label": "Unknown",
+                "risk_level": "Unknown",
+                "domain": source_domain
+            },
+            "analysis_stats": {
+                "processing_time": processing_time,
+                "sources_checked": 0,
+                "confidence_level": 0
+            },
+            "active_agents": [],
+            "quick_actions": {}
+        }
+    
+    if not agui_response:
+        agui_response = {}
+    
+    # Calcular score_fraction
+    score = agui_response.get("score", 0)
+    score_fraction = f"{score}/10"
+    
+    # Construir source_credibility
+    source_credibility = agui_response.get("source_credibility", {})
+    if not isinstance(source_credibility, dict):
+        source_credibility = {}
+    
+    source_credibility_obj = {
+        "label": source_credibility.get("label", "Unknown"),
+        "risk_level": source_credibility.get("risk_level", "Unknown"),
+        "domain": source_domain
+    }
+    
+    # Construir analysis_stats
+    analysis_stats = {
+        "processing_time": processing_time,
+        "sources_checked": agui_response.get("sources_checked", 0),
+        "confidence_level": agui_response.get("confidence_level", 0)
+    }
+    
+    return {
+        "headline": agui_response.get("headline", ""),
+        "url": agui_response.get("url", url),
+        "source_domain": source_domain,
+        "score": score,
+        "score_label": agui_response.get("score_label", "Unknown"),
+        "score_fraction": score_fraction,
+        "main_claim": agui_response.get("main_claim", ""),
+        "detailed_analysis": agui_response.get("detailed_analysis", ""),
+        "verified_sources": agui_response.get("verified_sources", []),
+        "verified_sources_label": agui_response.get("verified_sources_label", "N/A"),
+        "recommendation": agui_response.get("recommendation", ""),
+        "media_literacy_tip": agui_response.get("media_literacy_tip", ""),
+        "source_credibility": source_credibility_obj,
+        "analysis_stats": analysis_stats,
+        "active_agents": agui_response.get("active_agents", []),
+        "quick_actions": agui_response.get("quick_actions", {})
+    }
 
 if __name__ == "__main__":
     import uvicorn

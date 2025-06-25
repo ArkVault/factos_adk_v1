@@ -1,0 +1,47 @@
+# Cloud Run Deployment Configuration
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: factos-agents
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/execution-environment: gen2
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/cpu-boost: true
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/maxScale: "10"
+        autoscaling.knative.dev/minScale: "0"
+    spec:
+      containerConcurrency: 100
+      timeoutSeconds: 300
+      containers:
+      - image: gcr.io/PROJECT_ID/factos-agents:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        env:
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: factos-secrets
+              key: GOOGLE_API_KEY
+        - name: FIRECRAWL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: factos-secrets
+              key: FIRECRAWL_API_KEY
+        - name: PERPLEXITY_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: factos-secrets
+              key: PERPLEXITY_API_KEY
+        - name: PORT
+          value: "8080"
+        - name: PYTHONPATH
+          value: "/app"
