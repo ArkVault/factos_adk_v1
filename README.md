@@ -42,7 +42,8 @@ The Factos is an asynchronous multi-agent pipeline in which each autonomous agen
 
 3. **FactCheckMatcherAgent**  
    - Matches the extracted claim to verified claims using vector search  
-   - Uses Faiss or Chroma to perform cosine similarity comparison  
+   - Perform cosine similarity comparison  
+   - Semantic matching
    - Supports optional integration with real-time fact-checking APIs  
 
 4. **TruthScorerAgent**  
