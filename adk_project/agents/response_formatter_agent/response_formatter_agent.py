@@ -92,6 +92,7 @@ class ResponseFormatterAgent(LlmAgent):
         gemini_api_key = os.environ.get("GEMINI_API_KEY")
         genai.configure(api_key=gemini_api_key)
         model = genai.GenerativeModel("gemini-2.5-flash")
+        perplexity_used = False
         # 1. Priorizar fact-checkers: si hay claims_found de la lista prioritaria, usarlos primero
         if claims_found:
             recommendation = "Based on related fact-checks from trusted fact-checkers, review the following sources for verification and context."
@@ -108,12 +109,12 @@ class ResponseFormatterAgent(LlmAgent):
             ]
             firecrawl_results = asyncio.run(firecrawl_search_tool(claim, fallback_domains, limit=5, include_subdomains=True, similarity_threshold=60))
             context_text = "\n".join([f"Headline: {r.get('title', '')}\nClaim: {r.get('markdown', '')[:200]}" for r in firecrawl_results.get('results', [])])
-            # Si Firecrawl tampoco encuentra, usar Perplexity Sonar
             if not firecrawl_results.get('results'):
                 perplexity_api_key = os.environ.get("PERPLEXITY_API_KEY")
                 sonar_content = perplexity_sonar_search(claim, perplexity_api_key, domains=fallback_domains)
                 context_text = sonar_content
-            prompt = f"Given the following related fact-checks from reputable sources, briefly assess the plausibility of the main claim.\nClaim: {claim}\nFact-checks:\n{context_text}"
+                perplexity_used = True
+            prompt = f"Based on the following information from official news channels and fact-checkers, briefly assess the plausibility of the main claim.\nClaim: {claim}\nFact-checks:\n{context_text}"
             detailed_analysis = model.generate_content(prompt).text
         # 1. Main claim: resumido y limpio
         def clean_main_claim(text):
@@ -162,8 +163,10 @@ class ResponseFormatterAgent(LlmAgent):
             "sources_checked": len(claims_found),
             "original_source_label": "High Trust" if claims_found else "Medium Risk",
             "original_source_url": original_url,
-            "verified_sources_label": "High Trust" if claims_found else "Medium Risk"
+            "verified_sources_label": "High Trust" if claims_found else "Medium Risk",
+            "perplexity_used": perplexity_used
         }
+        print(f"[AGUI] Perplexity Sonar used: {perplexity_used}")
         return agui_response
 
     def perplexity_sonar_search(query, api_key, domains=None):
