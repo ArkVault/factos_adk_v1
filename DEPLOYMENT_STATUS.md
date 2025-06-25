@@ -1,12 +1,19 @@
 # 🚀 Factos Agents - Estado del Despliegue
 
-## ✅ Estado Actual: DESPLEGADO Y FUNCIONAL
+## ✅ Estado Actual: DESPLEGADO Y FUNCIONAL - SEGURIDAD REMEDIADA
 
 ### 📍 Información del Servicio
 - **URL del Servicio**: `https://factos-agents-158463493485.us-central1.run.app`
 - **Región**: `us-central1`
 - **Estado**: ✅ Activo y funcionando
-- **Último despliegue**: 2025-06-25T11:45:06.865354Z
+- **Último despliegue**: 2025-06-25T20:35:05.980235Z
+
+### 🔒 Estado de Seguridad
+- ✅ **API Key Rotada**: Clave expuesta revocada y reemplazada
+- ✅ **Cloud Run Actualizado**: Nuevas variables de entorno desplegadas
+- ✅ **Historial Git Limpio**: Sin rastros de claves expuestas
+- ✅ **Documentación Actualizada**: Procedimientos de seguridad documentados
+- ✅ **Verificación Completa**: Servicio funcionando correctamente
 
 ### 🔗 Endpoints Disponibles
 
