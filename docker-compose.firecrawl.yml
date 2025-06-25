@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  firecrawl:
+    image: firecrawl/firecrawl:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}

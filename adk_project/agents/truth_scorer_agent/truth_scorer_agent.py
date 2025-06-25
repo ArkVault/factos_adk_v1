@@ -24,42 +24,39 @@ class TruthScorerAgent(LlmAgent):
         )
 
     async def run_async(self, ctx):
+        import time
         claim = ctx.session.state.get("extracted_claim", {}).get("claim", "")
         matches = ctx.session.state.get("match_results", {}).get("matches", [])
-        if "Gibraltar" in claim:
+        start = time.time()
+        if not claim:
+            ctx.session.state["scored_result"] = {}
+            yield
+            return
+        # Análisis real basado en matches
+        if matches:
+            # Si hay coincidencias, toma la más relevante
+            best = matches[0]
             ctx.session.state["scored_result"] = {
-                "score": 0,
+                "score": 0,  # Asume verdadero si hay match fuerte
                 "label": "True",
                 "main_claim": claim,
-                "detailed_analysis": (
-                    "Multiple fact-checkers confirm that the new UK-Gibraltar-Spain deal does not alter British sovereignty over Gibraltar. "
-                    "The agreement is designed to maintain free movement and reduce border friction, and is considered a diplomatic breakthrough after years of negotiation. "
-                    "No evidence was found of sovereignty transfer or misleading claims in major fact-checking sources."
-                ),
-                "verified_sources": [m["source"] for m in matches],
-                "recommendation": "No correction needed. The news is accurate according to current fact-checker sources.",
-                "media_literacy_tip": "Always check for official statements and multiple sources when reading about international agreements.",
-                "confidence_level": 98,
-                "processing_time": 2.1
+                "detailed_analysis": f"Se encontró una coincidencia relevante en fact-checkers: '{best.get('main_claim', best.get('headline', ''))}'. Fuente: {best.get('url', '')}",
+                "verified_sources": [m.get("url", "") for m in matches],
+                "recommendation": "La afirmación coincide con verificaciones externas. Consulta la fuente para más detalles.",
+                "media_literacy_tip": "Verifica siempre en múltiples fuentes de fact-checking.",
+                "confidence_level": 95,
+                "processing_time": round(time.time() - start, 2)
             }
         else:
-            # Simulación: salida estructurada como en la imagen adjunta
             ctx.session.state["scored_result"] = {
-                "score": 3,
-                "label": "False",
-                "main_claim": "Coffee consumption prevents 90% of all cancer cases according to new research",
-                "detailed_analysis": "The study referenced only looked at a specific type of liver cancer in lab mice, not humans. It found a correlation between a compound in coffee and reduced tumor growth in mice, but did not demonstrate cancer prevention in humans at any percentage close to 90%.",
-                "verified_sources": [
-                    "www.cancer.org",
-                    "medical-journal.org",
-                    "pubmed.ncbi.nlm.nih.gov",
-                    "mayoclinic.org",
-                    "harvard.edu",
-                    "who.int"
-                ],
-                "recommendation": "Correction: Coffee contains compounds that may have some anti-cancer properties in laboratory settings, but no evidence supports it preventing 90% of cancers.",
-                "media_literacy_tip": "Be wary of headlines claiming dramatic health benefits without specifying study limitations or population groups.",
-                "confidence_level": 94,
-                "processing_time": 2.3
+                "score": 2,
+                "label": "Context Needed",
+                "main_claim": claim,
+                "detailed_analysis": "No se encontraron coincidencias directas en los principales sitios de fact-checking. Se recomienda investigar más a fondo.",
+                "verified_sources": [],
+                "recommendation": "No hay verificación directa disponible. Consulta fuentes adicionales.",
+                "media_literacy_tip": "Desconfía de afirmaciones sin respaldo en sitios de verificación reconocidos.",
+                "confidence_level": 60,
+                "processing_time": round(time.time() - start, 2)
             }
         yield

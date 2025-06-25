@@ -1,0 +1,29 @@
+{
+  "title": "Arquitectura de Factos Agents",
+  "type": "architecture",
+  "nodes": [
+    {"id": "frontend", "label": "Frontend (Vercel)", "type": "frontend"},
+    {"id": "api", "label": "FastAPI Backend (Vertex AI Agent Builder)", "type": "backend"},
+    {"id": "root_agent", "label": "Root Agent", "type": "agent"},
+    {"id": "claim_extractor_agent", "label": "Claim Extractor Agent", "type": "agent"},
+    {"id": "fact_check_matcher_agent", "label": "Fact Check Matcher Agent", "type": "agent"},
+    {"id": "response_formatter_agent", "label": "Response Formatter Agent", "type": "agent"},
+    {"id": "smart_scraper_agent", "label": "Smart Scraper Agent", "type": "agent"},
+    {"id": "truth_scorer_agent", "label": "Truth Scorer Agent", "type": "agent"},
+    {"id": "vertex_ai", "label": "Vertex AI (Google Cloud)", "type": "cloud_service"},
+    {"id": "gcs", "label": "Google Cloud Storage", "type": "cloud_service"},
+    {"id": "aiplatform", "label": "AI Platform (google-cloud-aiplatform)", "type": "cloud_service"}
+  ],
+  "edges": [
+    {"from": "frontend", "to": "api", "label": "HTTP/REST"},
+    {"from": "api", "to": "root_agent", "label": "Invoca"},
+    {"from": "root_agent", "to": "claim_extractor_agent", "label": "Orquesta"},
+    {"from": "root_agent", "to": "fact_check_matcher_agent", "label": "Orquesta"},
+    {"from": "root_agent", "to": "response_formatter_agent", "label": "Orquesta"},
+    {"from": "root_agent", "to": "smart_scraper_agent", "label": "Orquesta"},
+    {"from": "root_agent", "to": "truth_scorer_agent", "label": "Orquesta"},
+    {"from": "api", "to": "vertex_ai", "label": "Despliegue"},
+    {"from": "api", "to": "gcs", "label": "Almacenamiento de datos"},
+    {"from": "api", "to": "aiplatform", "label": "ML Ops / Modelos"}
+  ]
+}
