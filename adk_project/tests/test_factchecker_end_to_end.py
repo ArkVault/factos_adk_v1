@@ -2,7 +2,12 @@ import sys
 import pytest
 import asyncio
 sys.path.insert(0, '/Users/gibrann/Documents/factos_agents')
-from adk_project.agents.fact_check_matcher_agent.factchecker_scraper import search_factchecker
+from adk_project.agents.fact_check_matcher_agent.factchecker_scraper import get_factchecker_claims
+from adk_project.agents.fact_check_matcher_agent.fact_check_matcher_agent import FactCheckMatcherAgent sys
+import pytest
+import asyncio
+sys.path.insert(0, '/Users/gibrann/Documents/factos_agents')
+from adk_project.agents.fact_check_matcher_agent.factchecker_scraper import get_factchecker_claims
 from adk_project.agents.fact_check_matcher_agent.fact_check_matcher_agent import semantic_match_with_gemini
 
 @pytest.mark.asyncio
@@ -29,7 +34,7 @@ async def test_factchecker_end_to_end():
         return html
     scraper_mod.fetch_url = fake_fetch_url
     # Ejecuta el scraping
-    links = await search_factchecker(session, base_url, query)
+    links = await get_factchecker_claims(query)
     assert any("es.snopes.com" in l for l in links)
     # Simula claims extraídos de los links
     mock_claims = [
@@ -55,7 +60,7 @@ async def test_factchecker_end_to_end_real():
     query = "Russia Ukraine aerial barrage"
     import aiohttp
     async with aiohttp.ClientSession() as session:
-        links = await search_factchecker(session, base_url, query)
+        links = await get_factchecker_claims(query)
     print("Links encontrados:", links)
     assert links, "No se encontraron links reales de fact-checkers."
     # Simula claims extraídos de los links (en un caso real, deberías scrapear cada link para extraer el claim principal)

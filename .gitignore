@@ -12,4 +12,7 @@ factos_venv/
 .vscode/
 
 # OS-generated files
-.DS_Store 
+.DS_Store
+
+# Environment variables
+.env
