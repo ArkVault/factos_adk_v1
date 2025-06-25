@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factos Agents - Prueba de API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .endpoint-info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Factos Agents - Prueba de API</h1>
+        
+        <div class="endpoint-info">
+            <strong>Endpoint Principal:</strong> <code>https://factos-agents-158463493485.us-central1.run.app/fact-check</code><br>
+            <strong>Método:</strong> POST<br>
+            <strong>Content-Type:</strong> application/json<br>
+            <strong>CORS:</strong> ✅ Habilitado para localhost:3000
+        </div>
+
+        <div class="form-group">
+            <label for="url">URL de noticia para verificar:</label>
+            <input type="url" id="url" placeholder="https://ejemplo.com/noticia" 
+                   value="https://www.theguardian.com/world/2025/may/21/israeli-troops-fire-warning-shots-25-diplomats-visiting-occupied-west-bank">
+        </div>
+
+        <div>
+            <button onclick="testMainEndpoint()">🔍 Probar /fact-check (POST)</button>
+            <button onclick="testDebugEndpoint()">🛠️ Probar /test-fact-check (GET)</button>
+            <button onclick="testHealthEndpoint()">❤️ Probar /health</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://factos-agents-158463493485.us-central1.run.app';
+
+        function showResult(content, type = 'success') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = content;
+        }
+
+        function showLoading(message) {
+            showResult(`⏳ ${message}`, 'loading');
+        }
+
+        async function testMainEndpoint() {
+            const url = document.getElementById('url').value;
+            if (!url) {
+                showResult('❌ Por favor ingresa una URL válida', 'error');
+                return;
+            }
+
+            showLoading('Procesando fact-check... esto puede tomar 30-60 segundos');
+
+            try {
+                const response = await fetch(`${API_BASE}/fact-check`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                showResult(`
+                    <h3>✅ Fact-check completado exitosamente</h3>
+                    <p><strong>Titular:</strong> ${data.headline}</p>
+                    <p><strong>Puntuación:</strong> ${data.score_label} (${data.score_fraction})</p>
+                    <p><strong>Análisis:</strong> ${data.detailed_analysis}</p>
+                    <p><strong>Tiempo de procesamiento:</strong> ${data.analysis_stats.processing_time.toFixed(2)}s</p>
+                    <details>
+                        <summary>Ver respuesta completa JSON</summary>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </details>
+                `, 'success');
+
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDebugEndpoint() {
+            const url = document.getElementById('url').value;
+            if (!url) {
+                showResult('❌ Por favor ingresa una URL válida', 'error');
+                return;
+            }
+
+            showLoading('Probando endpoint de debugging...');
+
+            try {
+                const response = await fetch(`${API_BASE}/test-fact-check?url=${encodeURIComponent(url)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                showResult(`
+                    <h3>✅ Endpoint de debugging funcional</h3>
+                    <p><strong>Método aceptado:</strong> ${data.method}</p>
+                    <p><strong>CORS habilitado:</strong> ${data.cors_enabled ? '✅' : '❌'}</p>
+                    <p><strong>URL recibida:</strong> ${data.received_url}</p>
+                    <p><strong>Listo para fact-check:</strong> ${data.ready_for_fact_check ? '✅' : '❌'}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `, 'success');
+
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testHealthEndpoint() {
+            showLoading('Verificando salud del servicio...');
+
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                showResult(`
+                    <h3>✅ Servicio saludable</h3>
+                    <p><strong>Estado:</strong> ${data.status}</p>
+                    <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `, 'success');
+
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

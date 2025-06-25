@@ -50,6 +50,7 @@ class AGUIResponse:
     # Fuentes verificadas
     verified_sources: List[VerifiedSource]  # Lista de fuentes que verifican/contradicen
     verified_sources_label: str             # "High Trust"
+    match_type: str                         # "direct", "derivative", "tangential"
     
     # Recomendación y educación
     recommendation: str            # "Correction: Coffee contains compounds..."
@@ -86,6 +87,7 @@ class AGUIResponse:
                 } for source in self.verified_sources
             ],
             "verified_sources_label": self.verified_sources_label,
+            "match_type": self.match_type,
             "recommendation": self.recommendation,
             "media_literacy_tip": self.media_literacy_tip,
             "source_credibility": {

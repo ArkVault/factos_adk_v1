@@ -312,14 +312,20 @@ class FactCheckMatcherAgent(LlmAgent):
             yield
             return
         
-        # STRATEGY 3: No good matches in fact-checkers, try broader search (but AGGRESSIVELY skip slow crawling)
-        print("[FactCheckMatcherAgent] 🔍 Step 3: Quick additional search (AGGRESSIVELY skipping slow crawling)...")
+        # STRATEGY 3: No good matches in fact-checkers, search verified media sources
+        print("[FactCheckMatcherAgent] � Step 3: Searching verified media sources...")
+        
+        # Search verified media sources for coverage of the claim
+        verified_media_matches = await self._search_verified_media_sources(claim)
         
         # Try Firecrawl for broader news verification (fast)
         firecrawl_matches = await self._search_with_firecrawl_enhanced(claim)
         
+        # Combine all sources
+        all_alternative_matches = verified_media_matches + firecrawl_matches
+        
         # SKIP traditional webcrawling completely if we have ANY results
-        total_existing_matches = len(perplexity_matches) + len(firecrawl_matches)
+        total_existing_matches = len(perplexity_matches) + len(all_alternative_matches)
         
         if total_existing_matches == 0:
             print("[FactCheckMatcherAgent] ⚠️ NO results from smart search - attempting MINIMAL ultra-fast crawl...")
@@ -329,15 +335,27 @@ class FactCheckMatcherAgent(LlmAgent):
             print(f"[FactCheckMatcherAgent] ✅ SKIPPING crawling - found {total_existing_matches} matches from smart search")
             traditional_matches = []
         
-        all_matches = perplexity_matches + firecrawl_matches + traditional_matches
+        all_matches = perplexity_matches + all_alternative_matches + traditional_matches
         
-        print(f"[FactCheckMatcherAgent] ⚠️ Analysis will be CAUTIOUS - total matches: {len(all_matches)}")
+        # Determinar calidad basada en tipos de fuentes encontradas
+        if verified_media_matches:
+            match_quality = "moderate"  # Medios verificados dan confianza moderada
+            confidence_level = "medium"
+            search_method = "efficient_search + verified_media"
+        else:
+            match_quality = "weak"
+            confidence_level = "low"
+            search_method = "efficient_search"
+        
+        print(f"[FactCheckMatcherAgent] ⚠️ Analysis will be {confidence_level.upper()} confidence - total matches: {len(all_matches)}")
         ctx.session.state["match_results"] = {
-            "matches": all_matches[:5],
-            "search_method": "efficient_search",
-            "match_quality": "weak",
-            "confidence_level": "low",
-            "total_found": len(all_matches)
+            "matches": all_matches[:8],  # Incluir más matches cuando hay medios verificados
+            "search_method": search_method,
+            "match_quality": match_quality,
+            "confidence_level": confidence_level,
+            "total_found": len(all_matches),
+            "verified_media_found": len(verified_media_matches),
+            "factcheck_found": len(perplexity_matches)
         }
         
         yield
@@ -361,7 +379,7 @@ class FactCheckMatcherAgent(LlmAgent):
                 print(f"[FactCheckMatcherAgent] ✅ Ultra-quick crawl completed: {len(result)} matches in <10s")
                 return result
             except asyncio.TimeoutError:
-                print("[FactCheckMatcherAgent] ⏰ Ultra-quick crawl timed out after 10s - SKIPPING completely")
+                print("[FactCheckMatcherAgent] ⏰ Ultra-quick crawl timed out after 10s - SKIPPING completamente")
                 return []
                 
         except Exception as e:
@@ -851,3 +869,117 @@ class FactCheckMatcherAgent(LlmAgent):
         url_pattern = r'https?://[^\s\)\]]+|www\.[^\s\)\]]+'
         urls = re.findall(url_pattern, text)
         return urls[0] if urls else ''
+    
+    async def _search_verified_media_sources(self, claim: str) -> list:
+        """Search verified media sources when fact-checkers don't have coverage"""
+        print(f"[FactCheckMatcherAgent] 📰 Searching verified media sources for: {claim[:50]}...")
+        
+        verified_sources = []
+        
+        # Lista de medios verificados y confiables
+        trusted_media_domains = [
+            "reuters.com", "apnews.com", "bbc.com", "npr.org",
+            "theguardian.com", "nytimes.com", "washingtonpost.com",
+            "cnn.com", "nbcnews.com", "cbsnews.com", "abcnews.go.com",
+            "bloomberg.com", "wsj.com", "usatoday.com"
+        ]
+        
+        try:
+            # Usar Firecrawl para búsqueda en medios verificados
+            from adk_project.utils.firecrawl import firecrawl_search_tool
+            
+            # Crear query específica para búsqueda de verificación
+            search_query = f'"{claim}" OR "{claim.split()[0]} {claim.split()[-1]}" site:reuters.com OR site:apnews.com OR site:bbc.com OR site:npr.org'
+            
+            print(f"[FactCheckMatcherAgent] 🔍 Searching with query: {search_query[:100]}...")
+            
+            # Búsqueda usando Firecrawl
+            search_results = await firecrawl_search_tool(search_query, limit=10)
+            
+            if search_results and isinstance(search_results, list):
+                for result in search_results[:5]:  # Limitar a 5 resultados
+                    if isinstance(result, dict):
+                        url = result.get('url', '')
+                        title = result.get('title', '')
+                        description = result.get('description', '')
+                        
+                        # Verificar si es de un medio confiable
+                        is_trusted = any(domain in url.lower() for domain in trusted_media_domains)
+                        
+                        if is_trusted and title:
+                            verified_sources.append({
+                                'source': 'Verified Media',
+                                'url': url,
+                                'headline': title,
+                                'main_claim': description or title,
+                                'rating': 'Media Coverage',
+                                'relevance_score': self._calculate_relevance(claim, title + ' ' + description),
+                                'source_type': 'verified_media',
+                                'domain': next((d for d in trusted_media_domains if d in url.lower()), 'unknown')
+                            })
+            
+            # Si no hay suficientes resultados, intentar búsqueda más específica
+            if len(verified_sources) < 3:
+                print(f"[FactCheckMatcherAgent] 🔍 Expanding search to more sources...")
+                
+                # Búsqueda más específica por keywords principales
+                main_keywords = self._extract_main_keywords(claim)
+                expanded_query = f'{" ".join(main_keywords)} verified OR confirmed OR official'
+                
+                expanded_results = await firecrawl_search_tool(expanded_query, limit=8)
+                
+                if expanded_results and isinstance(expanded_results, list):
+                    for result in expanded_results[:3]:
+                        if isinstance(result, dict):
+                            url = result.get('url', '')
+                            title = result.get('title', '')
+                            description = result.get('description', '')
+                            
+                            is_trusted = any(domain in url.lower() for domain in trusted_media_domains)
+                            
+                            if is_trusted and title and url not in [vs['url'] for vs in verified_sources]:
+                                verified_sources.append({
+                                    'source': 'Verified Media Expanded',
+                                    'url': url,
+                                    'headline': title,
+                                    'main_claim': description or title,
+                                    'rating': 'Media Coverage',
+                                    'relevance_score': self._calculate_relevance(claim, title + ' ' + description),
+                                    'source_type': 'verified_media_expanded',
+                                    'domain': next((d for d in trusted_media_domains if d in url.lower()), 'unknown')
+                                })
+            
+            print(f"[FactCheckMatcherAgent] ✅ Found {len(verified_sources)} verified media sources")
+            return verified_sources[:5]  # Máximo 5 fuentes
+            
+        except Exception as e:
+            print(f"[FactCheckMatcherAgent] ❌ Error in verified media search: {e}")
+            return []
+    
+    def _extract_main_keywords(self, claim: str) -> list:
+        """Extract main keywords from claim for targeted search"""
+        import re
+        
+        # Remover palabras comunes
+        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should'}
+        
+        # Extraer palabras importantes (más de 3 letras, no stop words)
+        words = re.findall(r'\b\w{4,}\b', claim.lower())
+        keywords = [word for word in words if word not in stop_words]
+        
+        return keywords[:5]  # Máximo 5 keywords principales
+    
+    def _calculate_relevance(self, claim: str, content: str) -> float:
+        """Calculate relevance score between claim and content"""
+        import re
+        
+        claim_words = set(re.findall(r'\b\w+\b', claim.lower()))
+        content_words = set(re.findall(r'\b\w+\b', content.lower()))
+        
+        if not claim_words or not content_words:
+            return 0.0
+        
+        intersection = claim_words.intersection(content_words)
+        union = claim_words.union(content_words)
+        
+        return len(intersection) / len(union) if union else 0.0

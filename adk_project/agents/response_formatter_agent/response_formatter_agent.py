@@ -82,25 +82,43 @@ class ResponseFormatterAgent(LlmAgent):
         else:
             return SourceCredibility("Medium Risk", "Medium", domain)
 
-    def _format_verified_sources(self, sources: list) -> list:
-        """Formatea las fuentes verificadas"""
+    def _format_verified_sources(self, sources: list, matches_data: dict = None) -> list:
+        """Formatea las fuentes verificadas - solo incluye fuentes con similitud real"""
         verified = []
+        
+        # Usar las fuentes que ya fueron filtradas por similitud por el truth_scorer
         for source in sources[:6]:  # Limitar a 6 fuentes como en la imagen
-            if isinstance(source, dict):
-                name = source.get('title', source.get('name', 'Fuente verificada'))
+            if isinstance(source, str) and source.startswith('http'):
+                # Es una URL directa, buscar información adicional en matches si está disponible
+                name = "Fact-checker verificado"
+                url = source
+                description = "Fuente que verificó contenido relacionado"
+                
+                # Intentar obtener más información de los matches
+                if matches_data and 'matches' in matches_data:
+                    for match in matches_data['matches']:
+                        if match.get('url') == source:
+                            name = match.get('headline', match.get('title', 'Fact-checker verificado'))
+                            description = f"Verificación: {match.get('verdict', match.get('rating', 'Contenido relacionado'))}"
+                            break
+                            
+            elif isinstance(source, dict):
+                name = source.get('title', source.get('name', source.get('headline', 'Fuente verificada')))
                 url = source.get('url', '#')
-                description = source.get('description', '')
+                description = source.get('description', source.get('verdict', source.get('rating', '')))
             else:
                 name = "Fuente verificada"
                 url = str(source) if source else '#'
-                description = ""
+                description = "Contenido verificado"
             
-            verified.append(VerifiedSource(name=name, url=url, description=description))
+            # Solo agregar si tiene URL válida (evitar placeholders)
+            if url and url != '#' and url.startswith('http'):
+                verified.append(VerifiedSource(name=name, url=url, description=description))
         
         return verified
 
     def _generate_recommendation(self, score: int, main_claim: str, detailed_analysis: str, fact_check_results: dict = None) -> str:
-        """Generate contextual analysis based on match quality and findings"""
+        """Generate contextual professional recommendation based on analysis"""
         try:
             # Configure Gemini
             genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -111,62 +129,53 @@ class ResponseFormatterAgent(LlmAgent):
             confidence_level = fact_check_results.get('confidence_level', 'low') if fact_check_results else 'low'
             matches = fact_check_results.get('matches', []) if fact_check_results else []
             
-            # Determine analysis tone based on match quality
-            if match_quality == 'strong' and confidence_level == 'high':
-                analysis_tone = "conclusive"
-            elif match_quality == 'moderate' and confidence_level in ['medium', 'high']:
-                analysis_tone = "moderate"
-            else:
-                analysis_tone = "cautious"
-            
             prompt = f"""
-            Generate a brief professional analysis (1-2 sentences max) in English about this claim's credibility.
+            Generate a professional recommendation (2-3 sentences max) in English for users about this fact-check result.
             
-            CLAIM: {main_claim}
-            SCORE: {score}/5
+            CLAIM EVALUATED: {main_claim}
+            ANALYSIS SCORE: {score}/5
+            DETAILED ANALYSIS: {detailed_analysis}
             MATCH QUALITY: {match_quality} 
             CONFIDENCE: {confidence_level}
-            MATCHES FOUND: {len(matches)}
-            
-            ANALYSIS TONE REQUIRED: {analysis_tone}
-            
-            Guidelines:
-            - If CONCLUSIVE: Be definitive about the claim's truth value based on strong fact-check matches
-            - If MODERATE: Be measured, mention limitations, suggest additional verification
-            - If CAUTIOUS: Be very careful, emphasize lack of clear verification, avoid strong conclusions
+            SOURCES FOUND: {len(matches)}
             
             Requirements:
+            - Be specific about the verification status and what it means for users
+            - Provide actionable advice based on the score and evidence quality
             - Professional tone, English only
-            - Maximum 2 sentences
-            - Match the required analysis tone
-            - Be specific about verification status
+            - Maximum 3 sentences
+            - Focus on practical guidance for users about trusting/using this information
+            - Avoid generic statements; be specific to this case
+            
+            Examples of good recommendations:
+            - "Strong verification from multiple fact-checkers confirms this claim's accuracy; you can confidently cite this information."
+            - "Limited fact-check coverage and mixed evidence suggest treating this claim cautiously until additional verification emerges."
+            - "No professional fact-check coverage found; verify independently through primary sources before accepting or sharing."
             """
             
             response = model.generate_content(prompt)
-            analysis = response.text.strip()
-            return analysis
+            recommendation = response.text.strip()
+            return recommendation
             
         except Exception as e:
-            print(f"Error generating analysis with Gemini: {e}")
-            return self._generate_fallback_analysis_by_quality(score, main_claim, match_quality if 'match_quality' in locals() else 'weak', len(matches) if 'matches' in locals() else 0)
+            print(f"Error generating recommendation with Gemini: {e}")
+            return self._generate_fallback_recommendation(score, main_claim, len(matches) if matches else 0)
+            return self._generate_fallback_recommendation(score, main_claim, len(matches) if matches else 0)
     
-    def _generate_fallback_analysis_by_quality(self, score: int, main_claim: str, match_quality: str, num_matches: int) -> str:
-        """Generate fallback analysis based on match quality"""
-        
-        if match_quality == 'strong':
-            if score <= 2:
-                return f"Based on {num_matches} strong fact-check matches, this claim is demonstrably false."
-            elif score >= 4:
-                return f"Strong verification from {num_matches} fact-checkers confirms this claim's accuracy."
-            else:
-                return f"Multiple fact-checkers provide mixed but conclusive evidence about this claim."
-        
-        elif match_quality == 'moderate':
-            return f"Limited fact-check coverage found; score {score}/5 suggests caution and additional verification needed."
-        
-        else:  # weak or unknown
-            return f"Insufficient fact-check coverage for definitive assessment; score {score}/5 based on available indicators."
-
+    def _generate_fallback_recommendation(self, score: int, main_claim: str, num_sources: int) -> str:
+        """Generate fallback recommendation based on score and sources"""
+        if score >= 4 and num_sources >= 2:
+            return f"Strong verification from {num_sources} sources confirms this claim's reliability; you can confidently reference this information."
+        elif score >= 3 and num_sources >= 1:
+            return f"Moderate verification suggests this claim is largely accurate, though cross-referencing with additional sources is recommended."
+        elif score == 2:
+            return f"Mixed evidence requires careful consideration; verify through primary sources before accepting or sharing this claim."
+        elif score == 1:
+            return f"Limited verification available; treat this claim with caution and seek additional authoritative sources."
+        else:
+            return f"Insufficient evidence to verify this claim; independent verification through multiple reliable sources is essential."
+    
+    
     def _generate_media_literacy_tip(self, score: int, main_claim: str, article_domain: str) -> str:
         """Generate brief contextual media literacy tip in English"""
         try:
@@ -249,8 +258,8 @@ class ResponseFormatterAgent(LlmAgent):
         # Análisis detallado
         detailed_analysis = scored.get('detailed_analysis', 'No hay análisis detallado disponible.')
         
-        # Fuentes verificadas
-        verified_sources = self._format_verified_sources(scored.get('verified_sources', []))
+        # Fuentes verificadas (con datos de matches para contexto)
+        verified_sources = self._format_verified_sources(scored.get('verified_sources', []), matches)
         verified_sources_label = "High Trust" if len(verified_sources) >= 3 else "Medium Trust"
         
         # Credibilidad de la fuente
@@ -264,6 +273,9 @@ class ResponseFormatterAgent(LlmAgent):
             confidence_level=scored.get('confidence_level', 60)
         )
         
+        # Determinar tipo de match del análisis
+        match_type = scored.get('match_type', 'tangential')
+        
         # Crear respuesta estructurada
         agui_response = AGUIResponse(
             headline=headline,
@@ -276,6 +288,7 @@ class ResponseFormatterAgent(LlmAgent):
             detailed_analysis=self._generate_recommendation(score, main_claim, detailed_analysis, matches),
             verified_sources=verified_sources,
             verified_sources_label=verified_sources_label,
+            match_type=match_type,
             recommendation=self._generate_recommendation(score, main_claim, detailed_analysis, matches),
             media_literacy_tip=self._generate_media_literacy_tip(score, main_claim, domain),
             source_credibility=source_credibility,

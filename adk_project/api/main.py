@@ -1,3 +1,11 @@
+import sys
+import os
+from pathlib import Path
+
+# Agregar el directorio padre al path para importaciones
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from fastapi import FastAPI, HTTPException, status, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, HttpUrl, validator
@@ -11,7 +19,6 @@ import asyncio
 import time
 import logging
 from dotenv import load_dotenv
-import os
 
 # Cargar variables de entorno
 load_dotenv()
@@ -414,6 +421,7 @@ def create_fact_check_result(
             "detailed_analysis": error_info.get("detailed_analysis", "An error occurred"),
             "verified_sources": [],
             "verified_sources_label": "N/A",
+            "match_type": "tangential",
             "recommendation": error_info.get("recommendation", "Please try again"),
             "media_literacy_tip": error_info.get("media_literacy_tip", "Always verify information from multiple sources"),
             "source_credibility": {
@@ -466,6 +474,7 @@ def create_fact_check_result(
         "detailed_analysis": agui_response.get("detailed_analysis", ""),
         "verified_sources": agui_response.get("verified_sources", []),
         "verified_sources_label": agui_response.get("verified_sources_label", "N/A"),
+        "match_type": agui_response.get("match_type", "tangential"),
         "recommendation": agui_response.get("recommendation", ""),
         "media_literacy_tip": agui_response.get("media_literacy_tip", ""),
         "source_credibility": source_credibility_obj,

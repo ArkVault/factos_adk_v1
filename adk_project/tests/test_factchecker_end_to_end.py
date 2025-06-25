@@ -3,11 +3,7 @@ import pytest
 import asyncio
 sys.path.insert(0, '/Users/gibrann/Documents/factos_agents')
 from adk_project.agents.fact_check_matcher_agent.factchecker_scraper import get_factchecker_claims
-from adk_project.agents.fact_check_matcher_agent.fact_check_matcher_agent import FactCheckMatcherAgent sys
-import pytest
-import asyncio
-sys.path.insert(0, '/Users/gibrann/Documents/factos_agents')
-from adk_project.agents.fact_check_matcher_agent.factchecker_scraper import get_factchecker_claims
+from adk_project.agents.fact_check_matcher_agent.fact_check_matcher_agent import FactCheckMatcherAgent
 from adk_project.agents.fact_check_matcher_agent.fact_check_matcher_agent import semantic_match_with_gemini
 
 @pytest.mark.asyncio
