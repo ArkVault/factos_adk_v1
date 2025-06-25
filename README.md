@@ -93,7 +93,7 @@ Factos is optimized for deployment as modular cloud-native services. Each agent 
 - Scheduled background jobs for:
   - Weekly updates to the fact-checking corpus
   - Cache refresh for real-time performance improvements
-prototype can be viewed here https://factoswebapp-arkvaults-projects-d96cac84.vercel.app/
+prototype can be viewed here [https://factoswebapp-arkvaults-projects-d96cac84.vercel.app/](https://factoswebapp-arkvaults-projects-d96cac84.vercel.app/)
 
 ---
 
