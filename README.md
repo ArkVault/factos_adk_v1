@@ -15,7 +15,7 @@ Misinformation is one of the greatest challenges of our era. It distorts public 
 ### Project Goals
 
 - Automate verification of user-submitted news articles
-- Extract the central factual claim using NLP
+- Extract the central factual claims
 - Match extracted claims to trusted static and real-time fact-checking sources
 - Return a structured misinformation score (0–3) with explanation and references
 - Provide a response formatted for frontend integration via the AG-UI protocol
